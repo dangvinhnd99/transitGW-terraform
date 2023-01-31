@@ -33,16 +33,16 @@ resource "aws_subnet" "edge_internal_subnet_1a" {
   }
 }
 
-# Define a Web server Internal subnet
-resource "aws_subnet" "edge_web_subnet_1a" {
-  vpc_id                  = aws_vpc.vpc3.id
-  cidr_block              = "192.168.4.0/24"
-  map_public_ip_on_launch = false
-  availability_zone       = "${var.region}a"
-  tags = {
-    Name = "Edge_VPC_Web_Subnet_1A"
-  }
-}
+# # Define a Web server Internal subnet
+# resource "aws_subnet" "edge_web_subnet_1a" {
+#   vpc_id                  = aws_vpc.vpc3.id
+#   cidr_block              = "192.168.4.0/24"
+#   map_public_ip_on_launch = false
+#   availability_zone       = "${var.region}a"
+#   tags = {
+#     Name = "Edge_VPC_Web_Subnet_1A"
+#   }
+# }
 #create NAT GW
 resource "aws_eip" "NAT_EIP" {
   vpc = true
@@ -55,7 +55,7 @@ resource "aws_nat_gateway" "NATGW" {
 
 # Attach  TGW to VPC3
 resource "aws_ec2_transit_gateway_vpc_attachment" "tgw_attach_edge" {
-  subnet_ids         = [aws_subnet.edge_internal_subnet_1a.id]
+  subnet_ids         = [aws_subnet.edge_external_subnet_1a.id]
   transit_gateway_id = var.aws_ec2_transit_gateway
   vpc_id             = aws_vpc.vpc3.id
 }
@@ -70,20 +70,20 @@ resource "aws_route_table" "edge_pub_rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.edge_vpc_igw.id
   }
+
+  route {
+    cidr_block         = "10.20.0.0/16"
+    transit_gateway_id = var.aws_ec2_transit_gateway
+  }
+  route {
+    cidr_block         = "10.10.0.0/16"
+    transit_gateway_id = var.aws_ec2_transit_gateway
+  }
   tags = {
     Name = "Edge_VPC_Public_Route_Table"
   }
 }
-# resource "aws_route" "default_private_route" {
-#   route_table_id         = aws_route_table.edge_pub_rt.id
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id         = aws_nat_gateway.NATGW.id
-# }
-# resource "aws_route" "public_route" {
-#   route_table_id         = aws_route_table.edge_pub_rt.id
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id         = aws_nat_gateway.NATGW.id
-# }
+
 resource "aws_route_table_association" "edge_rt_associatio_1a" {
   subnet_id      = aws_subnet.edge_external_subnet_1a.id
   route_table_id = aws_route_table.edge_pub_rt.id
