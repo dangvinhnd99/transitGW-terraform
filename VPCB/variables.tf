@@ -1,8 +1,26 @@
-variable "vpc_cidr_A" {
+variable "vpc_cidr_2" {
   type        = string
   description = "This configures the vpc cidr"
 }
-variable "public_subnet1_az1_cidr" {
+variable "private_subnet1_az1_cidr" {
   type        = string
   description = "This configures the public subnet1 cidr"
+}
+variable "private_subnet2_az2_cidr" {
+  type        = string
+  description = "This configures the public subnet1 cidr"
+}
+variable "ubuntu_20_ami_sg" {
+  type        = string
+  description = "This configures the public subnet1 cidr"
+}
+
+variable "region" {
+  type = string
+}
+variable "aws_ec2_transit_gateway" {
+  type = string
+}
+variable "key_name" {
+  type = string
 }
