@@ -17,6 +17,12 @@ resource "aws_security_group" "VPC1_web_sg" {
     protocol    = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
 
   ingress {

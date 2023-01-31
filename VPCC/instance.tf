@@ -11,6 +11,24 @@ resource "aws_security_group" "edge_vpc_permissive_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 8
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   # outbound internet access
   egress {
@@ -19,6 +37,7 @@ resource "aws_security_group" "edge_vpc_permissive_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 }
 
 # resource "aws_network_interface" "nat_nic1" {
@@ -43,9 +62,12 @@ resource "aws_security_group" "edge_vpc_permissive_sg" {
 
 # Create Ubuntu  NAT Instance (Linux Firewall) to route north-south and east-west traffic 
 resource "aws_instance" "vpc_edge_nat" {
-  ami           = var.ubuntu_20_ami_sg
-  instance_type = "t2.micro"
-  key_name      = var.key_name
+  subnet_id                   = aws_subnet.edge_external_subnet_1a.id
+  ami                         = var.ubuntu_20_ami_sg
+  instance_type               = "t2.micro"
+  key_name                    = var.key_name
+  vpc_security_group_ids      = [aws_security_group.edge_vpc_permissive_sg.id]
+  associate_public_ip_address = true
   //user_data = file("/home/vinh/Documents/transitGW-terraform/VPCC/userdata_NATGW.sh")
   tags = {
     Name = "vpc_edge_NAT_Instance"
@@ -75,12 +97,7 @@ resource "aws_security_group" "edge_web_sg" {
     protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 8
-    to_port     = 0
-    protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
   ingress {
     from_port       = 22
     to_port         = 22
@@ -97,17 +114,17 @@ resource "aws_security_group" "edge_web_sg" {
   }
 }
 
-# Create Ubuntu web server on private subnet
-resource "aws_instance" "web1" {
-  ami           = "ami-0aa7d40eeae50c9a9"
-  instance_type = "t2.micro"
-  # private_ip                  = "10.7.5.20"
-  subnet_id                   = aws_subnet.edge_web_subnet_1a.id
-  key_name                    = var.key_name
-  vpc_security_group_ids      = [aws_security_group.edge_web_sg.id]
-  associate_public_ip_address = false
-  // user_data                   = filebase64("/home/vinh/Documents/transitGW-terraform/VPCC/userdata-web.sh")
-  tags = {
-    Name = "Edge_VPC_Web_Server_1"
-  }
-}
+# # Create Ubuntu web server on private subnet
+# resource "aws_instance" "web1" {
+#   ami           = "ami-0aa7d40eeae50c9a9"
+#   instance_type = "t2.micro"
+#   # private_ip                  = "10.7.5.20"
+#   subnet_id                   = aws_subnet.edge_web_subnet_1a.id
+#   key_name                    = var.key_name
+#   vpc_security_group_ids      = [aws_security_group.edge_web_sg.id]
+#   associate_public_ip_address = false
+#   // user_data                   = filebase64("/home/vinh/Documents/transitGW-terraform/VPCC/userdata-web.sh")
+#   tags = {
+#     Name = "Edge_VPC_Web_Server_1"
+#   }
+# }
