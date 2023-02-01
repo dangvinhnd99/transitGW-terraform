@@ -42,16 +42,21 @@ resource "aws_subnet" "private_data_subnet_az2" {
   }
 }
 
-# Attach  TGW to VPC2
+//Attach  TGW to VPC2
 resource "aws_ec2_transit_gateway_vpc_attachment" "tgw_attach_VPC2" {
-  subnet_ids         = [aws_subnet.private_data_subnet_az1.id]
-  transit_gateway_id = var.aws_ec2_transit_gateway
-  vpc_id             = aws_vpc.vpc2.id
+  subnet_ids                                      = [aws_subnet.private_data_subnet_az1.id, aws_subnet.private_data_subnet_az2.id]
+  transit_gateway_id                              = var.aws_ec2_transit_gateway
+  vpc_id                                          = aws_vpc.vpc2.id
+  transit_gateway_default_route_table_association = false
+  transit_gateway_default_route_table_propagation = false
 }
 
 # Create an internal/private Route Table
 resource "aws_route_table" "VPC2_prv_rt" {
   vpc_id = aws_vpc.vpc2.id
+  tags = {
+    Name = "VPC2_prv_rt"
+  }
 }
 
 resource "aws_route" "vpc2_internet_access" {
@@ -62,7 +67,7 @@ resource "aws_route" "vpc2_internet_access" {
 
 resource "aws_route" "vpc2_tgw_access" {
   route_table_id         = aws_route_table.VPC2_prv_rt.id
-  destination_cidr_block = "10.0.0.0/8"
+  destination_cidr_block = "192.168.0.0/16"
   transit_gateway_id     = var.aws_ec2_transit_gateway
 }
 

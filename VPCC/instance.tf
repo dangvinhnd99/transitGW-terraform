@@ -6,6 +6,19 @@ resource "aws_security_group" "edge_vpc_permissive_sg" {
 
   # access from the internet
   ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -40,25 +53,6 @@ resource "aws_security_group" "edge_vpc_permissive_sg" {
 
 }
 
-# resource "aws_network_interface" "nat_nic1" {
-#   subnet_id         = aws_subnet.edge_external_subnet_1a.id
-#   private_ips       = ["10.7.0.10"]
-#   security_groups   = [aws_security_group.edge_vpc_permissive_sg.id]
-#   source_dest_check = false
-#   tags = {
-#     Name = "external_network_interface"
-#   }
-# }
-
-# resource "aws_network_interface" "nat_nic2" {
-#   subnet_id         = aws_subnet.edge_internal_subnet_1a.id
-#   private_ips       = ["10.7.1.10"]
-#   security_groups   = [aws_security_group.edge_vpc_permissive_sg.id]
-#   source_dest_check = false
-#   tags = {
-#     Name = "internal_network_interface"
-#   }
-# }
 
 # Create Ubuntu  NAT Instance (Linux Firewall) to route north-south and east-west traffic 
 resource "aws_instance" "vpc_edge_nat" {

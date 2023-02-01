@@ -17,7 +17,7 @@ resource "aws_security_group" "VPC2_web_sg" {
     protocol    = "icmp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ngress {
+  ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "icmp"
@@ -34,7 +34,7 @@ resource "aws_security_group" "VPC2_web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "TCP"
-    cidr_blocks = ["10.0.0.0/8"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # outbound internet access
